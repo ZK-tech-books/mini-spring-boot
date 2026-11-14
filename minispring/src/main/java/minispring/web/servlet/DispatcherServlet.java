@@ -23,7 +23,7 @@ public class DispatcherServlet implements HttpHandler {
             for (Method method : bean.getClass().getDeclaredMethods()) {
                 GetMapping mapping = method.getAnnotation(GetMapping.class);
                 if (mapping != null) {
-                    handlers.put(mapping.value(), new Handler(bean, method));
+                    this.handlers.put(mapping.value(), new Handler(bean, method));
                 }
             }
         }
@@ -31,7 +31,7 @@ public class DispatcherServlet implements HttpHandler {
 
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        Handler handler = handlers.get(exchange.getRequestURI().getPath());
+        Handler handler = this.handlers.get(exchange.getRequestURI().getPath());
         if (!"GET".equals(exchange.getRequestMethod()) || handler == null) {
             respond(exchange, 404, "Not Found");
             return;

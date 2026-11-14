@@ -9,12 +9,12 @@ public class WebServer {
     private final HttpServer server;
 
     public WebServer(int port, HttpHandler handler) throws IOException {
-        server = HttpServer.create(new InetSocketAddress(port), 0);
-        server.createContext("/", handler);
+        this.server = HttpServer.create(new InetSocketAddress(port), 0);
+        this.server.createContext("/", handler);
     }
 
     public void start() {
-        server.start();
-        System.out.println("Started on port " + server.getAddress().getPort());
+        this.server.start();
+        System.out.println("Started on port " + this.server.getAddress().getPort());
     }
 }
