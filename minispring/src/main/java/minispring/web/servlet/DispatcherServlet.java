@@ -1,23 +1,30 @@
 package minispring.web.servlet;
 
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import minispring.context.ApplicationContext;
 import minispring.web.bind.annotation.GetMapping;
 import minispring.web.bind.annotation.RestController;
 
-public class DispatcherServlet implements HttpHandler {
+/**
+ * すべてのリクエストを受け、URL に対応する {@link RestController} のメソッドを呼ぶ Servlet。
+ */
+public class DispatcherServlet extends HttpServlet {
     private record Handler(Object bean, Method method) {
     }
 
     private final Map<String, Handler> handlers = new HashMap<>();
 
+    /**
+     * {@link RestController} の Bean から {@link GetMapping} の付いたメソッドを探し、URL とメソッドの表を作る。
+     *
+     * @param context Bean をすべて作り終えた {@link ApplicationContext}
+     */
     public DispatcherServlet(ApplicationContext context) {
         for (Object bean : context.getBeansWithAnnotation(RestController.class).values()) {
             for (Method method : bean.getClass().getDeclaredMethods()) {
@@ -29,27 +36,31 @@ public class DispatcherServlet implements HttpHandler {
         }
     }
 
+    /**
+     * URL に対応するメソッドを呼び、戻り値を文字にしてレスポンスに書く。
+     *
+     * @param request リクエスト
+     * @param response レスポンス
+     * @throws IOException レスポンスを書けなかったとき
+     */
     @Override
-    public void handle(HttpExchange exchange) throws IOException {
-        Handler handler = this.handlers.get(exchange.getRequestURI().getPath());
-        if (!"GET".equals(exchange.getRequestMethod()) || handler == null) {
-            respond(exchange, 404, "Not Found");
+    protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        Handler handler = this.handlers.get(request.getRequestURI());
+        if (!"GET".equals(request.getMethod()) || handler == null) {
+            respond(response, HttpServletResponse.SC_NOT_FOUND, "Not Found");
             return;
         }
         try {
             Object result = handler.method().invoke(handler.bean());
-            respond(exchange, 200, String.valueOf(result));
+            respond(response, HttpServletResponse.SC_OK, String.valueOf(result));
         } catch (ReflectiveOperationException e) {
-            respond(exchange, 500, "Internal Server Error");
+            respond(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
         }
     }
 
-    private void respond(HttpExchange exchange, int status, String body) throws IOException {
-        byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-        exchange.getResponseHeaders().set("Content-Type", "text/plain; charset=UTF-8");
-        exchange.sendResponseHeaders(status, bytes.length);
-        try (OutputStream out = exchange.getResponseBody()) {
-            out.write(bytes);
-        }
+    private void respond(HttpServletResponse response, int status, String body) throws IOException {
+        response.setStatus(status);
+        response.setContentType("text/plain; charset=UTF-8");
+        response.getWriter().write(body);
     }
 }
