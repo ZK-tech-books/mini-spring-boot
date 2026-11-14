@@ -2,9 +2,9 @@ package com.example.zkcoffee.repository;
 
 import java.util.HashMap;
 import java.util.Map;
-import minispring.stereotype.Component;
+import minispring.stereotype.Repository;
 
-@Component
+@Repository
 public class StockRepository {
     private final Map<String, Integer> stocks = new HashMap<>(Map.of("coffee", 10));
 
