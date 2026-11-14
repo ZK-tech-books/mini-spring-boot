@@ -1,66 +1,75 @@
 package minispring.web.servlet;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 import minispring.context.ApplicationContext;
-import minispring.web.bind.annotation.GetMapping;
-import minispring.web.bind.annotation.RestController;
+import minispring.web.HttpRequestMethodNotSupportedException;
+import minispring.web.method.HandlerMethod;
+import minispring.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
+import minispring.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
 /**
- * すべてのリクエストを受け、URL に対応する {@link RestController} のメソッドを呼ぶ Servlet。
+ * すべてのリクエストを受け、{@link HandlerMapping} が探したメソッドを {@link HandlerAdapter} に呼ばせる Servlet。
  */
 public class DispatcherServlet extends HttpServlet {
-    private record Handler(Object bean, Method method) {
-    }
-
-    private final Map<String, Handler> handlers = new HashMap<>();
+    private final ApplicationContext applicationContext;
+    private HandlerMapping handlerMapping;
+    private HandlerAdapter handlerAdapter;
 
     /**
-     * {@link RestController} の Bean から {@link GetMapping} の付いたメソッドを探し、URL とメソッドの表を作る。
+     * Servlet を作る。
      *
-     * @param context Bean をすべて作り終えた {@link ApplicationContext}
+     * @param applicationContext Bean をすべて作り終えた {@link ApplicationContext}
      */
-    public DispatcherServlet(ApplicationContext context) {
-        for (Object bean : context.getBeansWithAnnotation(RestController.class).values()) {
-            for (Method method : bean.getClass().getDeclaredMethods()) {
-                GetMapping mapping = method.getAnnotation(GetMapping.class);
-                if (mapping != null) {
-                    this.handlers.put(mapping.value(), new Handler(bean, method));
-                }
-            }
-        }
+    public DispatcherServlet(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
     }
 
     /**
-     * URL に対応するメソッドを呼び、戻り値を文字にしてレスポンスに書く。
+     * Tomcat が最初のリクエストの前に呼ぶ初期化で、{@link HandlerMapping} と {@link HandlerAdapter} を作る。
+     */
+    @Override
+    public void init() {
+        initStrategies(this.applicationContext);
+    }
+
+    private void initStrategies(ApplicationContext context) {
+        this.handlerMapping = new RequestMappingHandlerMapping(context);
+        this.handlerAdapter = new RequestMappingHandlerAdapter();
+    }
+
+    /**
+     * リクエストを {@link #doDispatch} に渡す。
      *
      * @param request リクエスト
      * @param response レスポンス
+     * @throws ServletException リクエストを受けるメソッドが例外を投げたとき
      * @throws IOException レスポンスを書けなかったとき
      */
     @Override
-    protected void service(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        Handler handler = this.handlers.get(request.getRequestURI());
-        if (!"GET".equals(request.getMethod()) || handler == null) {
-            respond(response, HttpServletResponse.SC_NOT_FOUND, "Not Found");
-            return;
-        }
+    protected void service(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        doDispatch(request, response);
+    }
+
+    private void doDispatch(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
         try {
-            Object result = handler.method().invoke(handler.bean());
-            respond(response, HttpServletResponse.SC_OK, String.valueOf(result));
-        } catch (ReflectiveOperationException e) {
-            respond(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
+            HandlerMethod handler = this.handlerMapping.getHandler(request);
+            if (handler == null) {
+                noHandlerFound(response);
+                return;
+            }
+            this.handlerAdapter.handle(request, response, handler);
+        } catch (HttpRequestMethodNotSupportedException e) {
+            response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
         }
     }
 
-    private void respond(HttpServletResponse response, int status, String body) throws IOException {
-        response.setStatus(status);
-        response.setContentType("text/plain; charset=UTF-8");
-        response.getWriter().write(body);
+    private void noHandlerFound(HttpServletResponse response) throws IOException {
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
     }
 }

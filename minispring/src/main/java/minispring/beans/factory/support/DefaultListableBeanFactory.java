@@ -4,9 +4,11 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import minispring.beans.factory.BeanFactoryAware;
 import minispring.beans.factory.config.BeanDefinition;
 import minispring.beans.factory.config.BeanPostProcessor;
@@ -60,7 +62,7 @@ public class DefaultListableBeanFactory {
     }
 
     /**
-     * 指定したアノテーションがクラスに付いた Bean を、名前と組にして返す。
+     * 指定したアノテーションが、直接かほかのアノテーションを通してクラスに付いた Bean を、名前と組にして返す。
      *
      * @param annotationType 探すアノテーション
      * @return Bean の名前と Bean の組
@@ -68,11 +70,24 @@ public class DefaultListableBeanFactory {
     public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
         Map<String, Object> beans = new LinkedHashMap<>();
         for (Map.Entry<String, BeanDefinition> entry : this.beanDefinitionMap.entrySet()) {
-            if (entry.getValue().getBeanClass().isAnnotationPresent(annotationType)) {
+            if (isAnnotated(entry.getValue().getBeanClass(), annotationType, new HashSet<>())) {
                 beans.put(entry.getKey(), getBean(entry.getKey()));
             }
         }
         return beans;
+    }
+
+    private boolean isAnnotated(Class<?> type, Class<? extends Annotation> annotationType, Set<Class<?>> visited) {
+        if (type.isAnnotationPresent(annotationType)) {
+            return true;
+        }
+        for (Annotation annotation : type.getAnnotations()) {
+            Class<? extends Annotation> metaType = annotation.annotationType();
+            if (visited.add(metaType) && isAnnotated(metaType, annotationType, visited)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

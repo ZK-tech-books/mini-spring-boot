@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -89,20 +90,22 @@ public class ClassPathBeanDefinitionScanner {
     }
 
     /**
-     * クラスに {@link Component} か、{@link Component} を付けたアノテーションが付いているかを返す。
+     * クラスに、直接かほかのアノテーションを通して {@link Component} が付いているかを返す。
      *
      * @param type 調べるクラス
      * @return Bean にするクラスなら {@code true}
      */
     private boolean isCandidateComponent(Class<?> type) {
-        if (type.isAnnotation()) {
-            return false;
-        }
+        return !type.isAnnotation() && isAnnotated(type, new HashSet<>());
+    }
+
+    private boolean isAnnotated(Class<?> type, Set<Class<?>> visited) {
         if (type.isAnnotationPresent(Component.class)) {
             return true;
         }
         for (Annotation annotation : type.getAnnotations()) {
-            if (annotation.annotationType().isAnnotationPresent(Component.class)) {
+            Class<? extends Annotation> annotationType = annotation.annotationType();
+            if (visited.add(annotationType) && isAnnotated(annotationType, visited)) {
                 return true;
             }
         }
