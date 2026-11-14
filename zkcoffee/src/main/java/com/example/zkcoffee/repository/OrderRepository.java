@@ -1,8 +1,8 @@
-package demo;
+package com.example.zkcoffee.repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import minispring.Component;
+import minispring.stereotype.Component;
 
 @Component
 public class OrderRepository {

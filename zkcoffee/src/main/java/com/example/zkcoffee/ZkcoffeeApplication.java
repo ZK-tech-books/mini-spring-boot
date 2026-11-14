@@ -1,10 +1,13 @@
-package demo;
+package com.example.zkcoffee;
 
-import minispring.ApplicationContext;
+import com.example.zkcoffee.repository.OrderRepository;
+import com.example.zkcoffee.repository.StockRepository;
+import com.example.zkcoffee.service.OrderService;
+import minispring.context.ApplicationContext;
 
-public class Main {
+public class ZkcoffeeApplication {
     public static void main(String[] args) {
-        ApplicationContext context = new ApplicationContext("demo");
+        ApplicationContext context = new ApplicationContext("com.example.zkcoffee");
         StockRepository stockRepository = context.getBean(StockRepository.class);
         OrderRepository orderRepository = context.getBean(OrderRepository.class);
 

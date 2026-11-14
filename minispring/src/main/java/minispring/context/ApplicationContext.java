@@ -1,4 +1,4 @@
-package minispring;
+package minispring.context;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -10,6 +10,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import minispring.beans.factory.annotation.Autowired;
+import minispring.stereotype.Component;
 
 public class ApplicationContext {
     private final List<Object> beans = new ArrayList<>();

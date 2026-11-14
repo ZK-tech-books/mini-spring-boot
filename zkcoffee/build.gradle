@@ -8,6 +8,10 @@ java {
     }
 }
 
+dependencies {
+    implementation project(':minispring')
+}
+
 application {
-    mainClass = 'demo.Main'
+    mainClass = 'com.example.zkcoffee.ZkcoffeeApplication'
 }

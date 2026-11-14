@@ -1,7 +1,9 @@
-package demo;
+package com.example.zkcoffee.service;
 
-import minispring.Autowired;
-import minispring.Component;
+import com.example.zkcoffee.repository.OrderRepository;
+import com.example.zkcoffee.repository.StockRepository;
+import minispring.beans.factory.annotation.Autowired;
+import minispring.stereotype.Component;
 
 @Component
 public class OrderService {
