@@ -2,9 +2,9 @@ package com.example.zkcoffee.repository;
 
 import java.util.ArrayList;
 import java.util.List;
-import minispring.stereotype.Component;
+import minispring.stereotype.Repository;
 
-@Component
+@Repository
 public class OrderRepository {
     private final List<String> orders = new ArrayList<>();
 

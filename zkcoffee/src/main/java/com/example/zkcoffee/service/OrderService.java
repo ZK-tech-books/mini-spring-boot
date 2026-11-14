@@ -3,9 +3,9 @@ package com.example.zkcoffee.service;
 import com.example.zkcoffee.repository.OrderRepository;
 import com.example.zkcoffee.repository.StockRepository;
 import minispring.beans.factory.annotation.Autowired;
-import minispring.stereotype.Component;
+import minispring.stereotype.Service;
 
-@Component
+@Service
 public class OrderService {
     @Autowired
     private StockRepository stockRepository;
