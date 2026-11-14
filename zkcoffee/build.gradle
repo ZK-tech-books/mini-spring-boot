@@ -1,0 +1,17 @@
+plugins {
+    id 'application'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+dependencies {
+    implementation project(':minispring')
+}
+
+application {
+    mainClass = 'com.example.zkcoffee.ZkcoffeeApplication'
+}

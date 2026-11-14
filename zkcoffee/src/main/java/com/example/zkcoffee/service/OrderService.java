@@ -1,0 +1,20 @@
+package com.example.zkcoffee.service;
+
+import com.example.zkcoffee.repository.OrderRepository;
+import com.example.zkcoffee.repository.StockRepository;
+import minispring.beans.factory.annotation.Autowired;
+import minispring.stereotype.Component;
+
+@Component
+public class OrderService {
+    @Autowired
+    private StockRepository stockRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    public void order(String itemId) {
+        stockRepository.decrease(itemId);
+        orderRepository.save(itemId);
+    }
+}
