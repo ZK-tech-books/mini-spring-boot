@@ -13,12 +13,12 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
-    public void order(String itemId) {
-        this.stockRepository.decrease(itemId);
-        this.orderRepository.save(itemId);
+    public void order(String productId) {
+        this.stockRepository.decrease(productId);
+        this.orderRepository.save(productId);
     }
 
-    public int findStock(String itemId) {
-        return this.stockRepository.findStock(itemId);
+    public int findStock(String productId) {
+        return this.stockRepository.findStock(productId);
     }
 }

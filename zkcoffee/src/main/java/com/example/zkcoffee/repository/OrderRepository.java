@@ -8,8 +8,8 @@ import minispring.stereotype.Repository;
 public class OrderRepository {
     private final List<String> orders = new ArrayList<>();
 
-    public void save(String itemId) {
-        this.orders.add(itemId);
+    public void save(String productId) {
+        this.orders.add(productId);
     }
 
     public int count() {
