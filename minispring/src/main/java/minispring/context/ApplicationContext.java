@@ -1,104 +1,65 @@
 package minispring.context;
 
-import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Stream;
-import minispring.beans.factory.annotation.Autowired;
-import minispring.stereotype.Component;
+import java.util.Map;
+import minispring.beans.factory.config.BeanDefinition;
+import minispring.beans.factory.config.BeanPostProcessor;
+import minispring.beans.factory.support.DefaultListableBeanFactory;
+import minispring.context.annotation.ClassPathBeanDefinitionScanner;
 
+/**
+ * パッケージをスキャンして BeanDefinition を登録し、Bean をすべて作るクラス。
+ * <p>
+ * Bean を作って覚えておく処理は、{@link DefaultListableBeanFactory} に任せる。
+ */
 public class ApplicationContext {
-    private final List<Object> beans = new ArrayList<>();
+    private final DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+    private final ClassPathBeanDefinitionScanner scanner = new ClassPathBeanDefinitionScanner(this);
 
-    public ApplicationContext(String basePackage) {
-        try {
-            for (Class<?> type : findComponents(basePackage)) {
-                Constructor<?> constructor = type.getDeclaredConstructor();
-                constructor.setAccessible(true);
-                beans.add(constructor.newInstance());
-            }
-            for (Object bean : beans) {
-                injectFields(bean);
-            }
-        } catch (ReflectiveOperationException | IOException | URISyntaxException e) {
-            throw new IllegalStateException("Failed to create beans in package: " + basePackage, e);
-        }
+    /**
+     * パッケージをスキャンし、見つけたクラスの Bean をすべて作る。
+     *
+     * @param basePackages スキャンするパッケージ
+     */
+    public ApplicationContext(String... basePackages) {
+        this.scanner.scan(basePackages);
+        refresh();
     }
 
-    public <T> T getBean(Class<T> type) {
-        List<Object> matches = beans.stream().filter(type::isInstance).toList();
-        if (matches.size() != 1) {
-            throw new IllegalArgumentException(
-                    "Expected 1 bean of " + type.getName() + " but found " + matches.size());
-        }
-        return type.cast(matches.getFirst());
+    /**
+     * BeanDefinition を {@link DefaultListableBeanFactory} に登録する。
+     *
+     * @param beanName Bean の名前
+     * @param beanDefinition Bean の設計図
+     */
+    public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
+        this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
     }
 
-    public List<Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
-        return beans.stream()
-                .filter(bean -> bean.getClass().isAnnotationPresent(annotationType))
-                .toList();
+    /**
+     * 指定したアノテーションがクラスに付いた Bean を、名前と組にして返す。
+     *
+     * @param annotationType 探すアノテーション
+     * @return Bean の名前と Bean の組
+     */
+    public Map<String, Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
+        return this.beanFactory.getBeansWithAnnotation(annotationType);
     }
 
-    private List<Class<?>> findComponents(String basePackage)
-            throws IOException, URISyntaxException, ClassNotFoundException {
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        String packagePath = basePackage.replace('.', '/');
-        URL url = loader.getResource(packagePath);
-        if (url == null) {
-            throw new IllegalArgumentException("Package not found: " + basePackage);
-        }
-        if (!"file".equals(url.getProtocol())) {
-            throw new IllegalArgumentException("Only class directories are supported: " + url);
-        }
-
-        Path root = Path.of(url.toURI());
-        List<Path> classFiles;
-        try (Stream<Path> files = Files.walk(root)) {
-            classFiles = files.filter(file -> file.toString().endsWith(".class")).toList();
-        }
-
-        List<Class<?>> components = new ArrayList<>();
-        for (Path classFile : classFiles) {
-            String relativePath = root.relativize(classFile).toString();
-            String simplePath = relativePath.substring(0, relativePath.length() - ".class".length());
-            String className = basePackage + "." + simplePath.replace('/', '.');
-            Class<?> type = Class.forName(className, false, loader);
-            if (isComponent(type)) {
-                components.add(type);
-            }
-        }
-        return components;
+    /**
+     * BeanPostProcessor を先に作ってから、残りの Bean をすべて作る。
+     */
+    private void refresh() {
+        registerBeanPostProcessors();
+        this.beanFactory.preInstantiateSingletons();
     }
 
-    private boolean isComponent(Class<?> type) {
-        if (type.isAnnotation()) {
-            return false;
-        }
-        if (type.isAnnotationPresent(Component.class)) {
-            return true;
-        }
-        for (Annotation annotation : type.getAnnotations()) {
-            if (annotation.annotationType().isAnnotationPresent(Component.class)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void injectFields(Object bean) throws IllegalAccessException {
-        for (Field field : bean.getClass().getDeclaredFields()) {
-            if (field.isAnnotationPresent(Autowired.class)) {
-                field.setAccessible(true);
-                field.set(bean, getBean(field.getType()));
-            }
+    /**
+     * BeanPostProcessor を実装したクラスの Bean を作り、{@link DefaultListableBeanFactory} に加える。
+     */
+    private void registerBeanPostProcessors() {
+        for (String beanName : this.beanFactory.getBeanNamesForType(BeanPostProcessor.class)) {
+            this.beanFactory.addBeanPostProcessor((BeanPostProcessor) this.beanFactory.getBean(beanName));
         }
     }
 }

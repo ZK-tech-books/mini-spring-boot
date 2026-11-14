@@ -19,7 +19,7 @@ public class DispatcherServlet implements HttpHandler {
     private final Map<String, Handler> handlers = new HashMap<>();
 
     public DispatcherServlet(ApplicationContext context) {
-        for (Object bean : context.getBeansWithAnnotation(RestController.class)) {
+        for (Object bean : context.getBeansWithAnnotation(RestController.class).values()) {
             for (Method method : bean.getClass().getDeclaredMethods()) {
                 GetMapping mapping = method.getAnnotation(GetMapping.class);
                 if (mapping != null) {
