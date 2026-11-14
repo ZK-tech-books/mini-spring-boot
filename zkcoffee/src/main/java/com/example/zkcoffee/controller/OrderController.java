@@ -12,6 +12,6 @@ public class OrderController {
 
     @GetMapping("/stock")
     public int stock() {
-        return orderService.findStock("coffee");
+        return this.orderService.findStock("coffee");
     }
 }

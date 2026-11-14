@@ -14,11 +14,11 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     public void order(String itemId) {
-        stockRepository.decrease(itemId);
-        orderRepository.save(itemId);
+        this.stockRepository.decrease(itemId);
+        this.orderRepository.save(itemId);
     }
 
     public int findStock(String itemId) {
-        return stockRepository.findStock(itemId);
+        return this.stockRepository.findStock(itemId);
     }
 }

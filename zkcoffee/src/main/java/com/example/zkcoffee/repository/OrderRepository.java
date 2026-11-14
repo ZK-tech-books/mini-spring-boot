@@ -9,10 +9,10 @@ public class OrderRepository {
     private final List<String> orders = new ArrayList<>();
 
     public void save(String itemId) {
-        orders.add(itemId);
+        this.orders.add(itemId);
     }
 
     public int count() {
-        return orders.size();
+        return this.orders.size();
     }
 }

@@ -9,10 +9,10 @@ public class StockRepository {
     private final Map<String, Integer> stocks = new HashMap<>(Map.of("coffee", 10));
 
     public int findStock(String itemId) {
-        return stocks.get(itemId);
+        return this.stocks.get(itemId);
     }
 
     public void decrease(String itemId) {
-        stocks.merge(itemId, -1, Integer::sum);
+        this.stocks.merge(itemId, -1, Integer::sum);
     }
 }
