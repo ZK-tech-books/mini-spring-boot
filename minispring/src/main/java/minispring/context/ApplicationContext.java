@@ -1,6 +1,7 @@
 package minispring.context;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
@@ -40,6 +41,12 @@ public class ApplicationContext {
         return type.cast(matches.getFirst());
     }
 
+    public List<Object> getBeansWithAnnotation(Class<? extends Annotation> annotationType) {
+        return beans.stream()
+                .filter(bean -> bean.getClass().isAnnotationPresent(annotationType))
+                .toList();
+    }
+
     private List<Class<?>> findComponents(String basePackage)
             throws IOException, URISyntaxException, ClassNotFoundException {
         ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -64,11 +71,26 @@ public class ApplicationContext {
             String simplePath = relativePath.substring(0, relativePath.length() - ".class".length());
             String className = basePackage + "." + simplePath.replace('/', '.');
             Class<?> type = Class.forName(className, false, loader);
-            if (type.isAnnotationPresent(Component.class)) {
+            if (isComponent(type)) {
                 components.add(type);
             }
         }
         return components;
+    }
+
+    private boolean isComponent(Class<?> type) {
+        if (type.isAnnotation()) {
+            return false;
+        }
+        if (type.isAnnotationPresent(Component.class)) {
+            return true;
+        }
+        for (Annotation annotation : type.getAnnotations()) {
+            if (annotation.annotationType().isAnnotationPresent(Component.class)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void injectFields(Object bean) throws IllegalAccessException {

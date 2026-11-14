@@ -17,4 +17,8 @@ public class OrderService {
         stockRepository.decrease(itemId);
         orderRepository.save(itemId);
     }
+
+    public int findStock(String itemId) {
+        return stockRepository.findStock(itemId);
+    }
 }
