@@ -21,6 +21,6 @@ public class OrderService {
     }
 
     public int getStock(String productName) {
-        return this.stockRepository.findStock(productName);
+        return this.stockRepository.findStock(productName).orElseThrow();
     }
 }
