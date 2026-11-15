@@ -13,7 +13,7 @@ public class OrderController {
     private OrderService orderService;
 
     @GetMapping("/stock")
-    public GetStockResponse stock() {
+    public GetStockResponse getStock() {
         return new GetStockResponse("coffee", this.orderService.getStock("coffee"));
     }
 
