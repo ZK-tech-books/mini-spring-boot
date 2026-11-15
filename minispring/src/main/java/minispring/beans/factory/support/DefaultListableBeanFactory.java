@@ -141,8 +141,7 @@ public class DefaultListableBeanFactory {
     private Object createBean(String beanName, BeanDefinition beanDefinition) {
         Object bean = createBeanInstance(beanName, beanDefinition);
         populateBean(bean);
-        initializeBean(bean);
-        return bean;
+        return initializeBean(bean);
     }
 
     /**
@@ -179,9 +178,26 @@ public class DefaultListableBeanFactory {
      * フィールドに値を入れ終えた Bean を仕上げる。
      *
      * @param bean フィールドに値を入れ終えた Bean
+     * @return ほかの Bean に渡すオブジェクト
      */
-    private void initializeBean(Object bean) {
+    private Object initializeBean(Object bean) {
         invokeAwareMethods(bean);
+        return applyBeanPostProcessorsAfterInitialization(bean);
+    }
+
+    /**
+     * BeanPostProcessor の {@link BeanPostProcessor#postProcessAfterInitialization} を順に呼び、
+     * 最後に返ったオブジェクトを返す。
+     *
+     * @param bean 仕上げた Bean
+     * @return ほかの Bean に渡すオブジェクト
+     */
+    private Object applyBeanPostProcessorsAfterInitialization(Object bean) {
+        Object result = bean;
+        for (BeanPostProcessor beanPostProcessor : this.beanPostProcessors) {
+            result = beanPostProcessor.postProcessAfterInitialization(result);
+        }
+        return result;
     }
 
     /**

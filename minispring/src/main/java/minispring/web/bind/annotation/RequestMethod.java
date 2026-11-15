@@ -7,5 +7,10 @@ public enum RequestMethod {
     /**
      * GET のリクエスト。
      */
-    GET
+    GET,
+
+    /**
+     * POST のリクエスト。
+     */
+    POST
 }
