@@ -15,12 +15,12 @@ public class OrderService {
     private OrderRepository orderRepository;
 
     @Transactional
-    public void order(String productId) {
-        this.stockRepository.decrease(productId);
-        this.orderRepository.save(productId);
+    public void order(String productName) {
+        this.stockRepository.decrease(productName);
+        this.orderRepository.save(productName);
     }
 
-    public int getStock(String productId) {
-        return this.stockRepository.findStock(productId);
+    public int getStock(String productName) {
+        return this.stockRepository.findStock(productName);
     }
 }
