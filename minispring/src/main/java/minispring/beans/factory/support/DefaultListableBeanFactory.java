@@ -30,7 +30,7 @@ public class DefaultListableBeanFactory {
      * BeanDefinition を名前と組にして登録する。
      *
      * @param beanName Bean の名前
-     * @param beanDefinition Bean の設計図
+     * @param beanDefinition 登録する BeanDefinition
      */
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         this.beanDefinitionMap.put(beanName, beanDefinition);
@@ -135,7 +135,7 @@ public class DefaultListableBeanFactory {
      * BeanDefinition から Bean を作る。
      *
      * @param beanName Bean の名前
-     * @param beanDefinition Bean の設計図
+     * @param beanDefinition Bean を作るもとにする BeanDefinition
      * @return 作った Bean
      */
     private Object createBean(String beanName, BeanDefinition beanDefinition) {
@@ -148,7 +148,7 @@ public class DefaultListableBeanFactory {
      * BeanDefinition のクラスを、引数のないコンストラクタで {@code new} する。
      *
      * @param beanName Bean の名前
-     * @param beanDefinition Bean の設計図
+     * @param beanDefinition Bean を作るもとにする BeanDefinition
      * @return {@code new} したばかりの Bean
      */
     private Object createBeanInstance(String beanName, BeanDefinition beanDefinition) {
