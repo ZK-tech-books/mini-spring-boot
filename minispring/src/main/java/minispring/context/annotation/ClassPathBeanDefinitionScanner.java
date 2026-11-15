@@ -11,10 +11,12 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
+import minispring.aop.framework.autoproxy.InfrastructureAdvisorAutoProxyCreator;
 import minispring.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor;
 import minispring.beans.factory.config.BeanDefinition;
 import minispring.context.ApplicationContext;
 import minispring.stereotype.Component;
+import minispring.transaction.interceptor.BeanFactoryTransactionAttributeSourceAdvisor;
 
 /**
  * パッケージの下から {@link Component} の付いたクラスを探し、BeanDefinition を登録するクラス。
@@ -22,6 +24,8 @@ import minispring.stereotype.Component;
 public class ClassPathBeanDefinitionScanner {
     private static final String AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME =
             "minispring.context.annotation.internalAutowiredAnnotationProcessor";
+    private static final String AUTO_PROXY_CREATOR_BEAN_NAME = "minispring.aop.config.internalAutoProxyCreator";
+    private static final String TRANSACTION_ADVISOR_BEAN_NAME = "minispring.transaction.config.internalTransactionAdvisor";
 
     private final ApplicationContext registry;
 
@@ -37,7 +41,8 @@ public class ClassPathBeanDefinitionScanner {
     /**
      * パッケージの下のクラスから BeanDefinition を作って登録する。
      * <p>
-     * 最後に、{@link AutowiredAnnotationBeanPostProcessor} の BeanDefinition も登録する。
+     * 最後に、{@link AutowiredAnnotationBeanPostProcessor}、{@link InfrastructureAdvisorAutoProxyCreator}、
+     * {@link BeanFactoryTransactionAttributeSourceAdvisor} の BeanDefinition も登録する。
      *
      * @param basePackages 探すパッケージ
      */
@@ -49,6 +54,10 @@ public class ClassPathBeanDefinitionScanner {
         }
         this.registry.registerBeanDefinition(AUTOWIRED_ANNOTATION_PROCESSOR_BEAN_NAME,
                 new BeanDefinition(AutowiredAnnotationBeanPostProcessor.class));
+        this.registry.registerBeanDefinition(AUTO_PROXY_CREATOR_BEAN_NAME,
+                new BeanDefinition(InfrastructureAdvisorAutoProxyCreator.class));
+        this.registry.registerBeanDefinition(TRANSACTION_ADVISOR_BEAN_NAME,
+                new BeanDefinition(BeanFactoryTransactionAttributeSourceAdvisor.class));
     }
 
     /**

@@ -4,6 +4,7 @@ import com.example.zkcoffee.repository.OrderRepository;
 import com.example.zkcoffee.repository.StockRepository;
 import minispring.beans.factory.annotation.Autowired;
 import minispring.stereotype.Service;
+import minispring.transaction.annotation.Transactional;
 
 @Service
 public class OrderService {
@@ -13,6 +14,7 @@ public class OrderService {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Transactional
     public void order(String productId) {
         this.stockRepository.decrease(productId);
         this.orderRepository.save(productId);
