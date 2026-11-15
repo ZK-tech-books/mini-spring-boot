@@ -20,7 +20,7 @@ public class OrderService {
         this.orderRepository.save(productId);
     }
 
-    public int findStock(String productId) {
+    public int getStock(String productId) {
         return this.stockRepository.findStock(productId);
     }
 }

@@ -14,7 +14,7 @@ public class OrderController {
 
     @GetMapping("/stock")
     public GetStockResponse stock() {
-        return new GetStockResponse("coffee", this.orderService.findStock("coffee"));
+        return new GetStockResponse("coffee", this.orderService.getStock("coffee"));
     }
 
     @PostMapping("/orders")
