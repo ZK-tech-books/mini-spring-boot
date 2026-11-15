@@ -178,7 +178,7 @@ public class DefaultListableBeanFactory {
      * フィールドに値を入れ終えた Bean を仕上げる。
      *
      * @param bean フィールドに値を入れ終えた Bean
-     * @return ほかの Bean に渡すオブジェクト
+     * @return ほかの Bean に渡すインスタンス
      */
     private Object initializeBean(Object bean) {
         invokeAwareMethods(bean);
@@ -187,10 +187,10 @@ public class DefaultListableBeanFactory {
 
     /**
      * BeanPostProcessor の {@link BeanPostProcessor#postProcessAfterInitialization} を順に呼び、
-     * 最後に返ったオブジェクトを返す。
+     * 最後に返ったインスタンスを返す。
      *
      * @param bean 仕上げた Bean
-     * @return ほかの Bean に渡すオブジェクト
+     * @return ほかの Bean に渡すインスタンス
      */
     private Object applyBeanPostProcessorsAfterInitialization(Object bean) {
         Object result = bean;

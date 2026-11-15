@@ -13,7 +13,7 @@ public interface BeanPostProcessor {
      * 戻り値が、Bean の代わりにほかの Bean に渡される。
      *
      * @param bean 作り終えた Bean
-     * @return ほかの Bean に渡すオブジェクト
+     * @return ほかの Bean に渡すインスタンス
      */
     default Object postProcessAfterInitialization(Object bean) {
         return bean;

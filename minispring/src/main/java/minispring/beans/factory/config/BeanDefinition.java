@@ -1,7 +1,7 @@
 package minispring.beans.factory.config;
 
 /**
- * Bean をどのクラスから作るかを書いておくオブジェクト。
+ * Bean をどのクラスから作るかを書いておくクラス。
  * <p>
  * スキャンで見つけたクラスごとに作り、
  * {@link minispring.beans.factory.support.DefaultListableBeanFactory} に名前と組にして登録する。
