@@ -30,7 +30,7 @@ public class ApplicationContext {
      * BeanDefinition を {@link DefaultListableBeanFactory} に登録する。
      *
      * @param beanName Bean の名前
-     * @param beanDefinition Bean の設計図
+     * @param beanDefinition 登録する BeanDefinition
      */
     public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
         this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
