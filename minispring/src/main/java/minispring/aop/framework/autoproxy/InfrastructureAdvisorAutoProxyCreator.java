@@ -88,7 +88,7 @@ public class InfrastructureAdvisorAutoProxyCreator implements BeanPostProcessor,
     }
 
     /**
-     * Byte Buddy で Bean のクラスのサブクラスを作り、そのオブジェクトをプロキシとして返す。
+     * Byte Buddy で Bean のクラスのサブクラスを作り、そのインスタンスをプロキシとして返す。
      * <p>
      * サブクラスは、Bean のクラスに書かれたメソッドをすべて上書きし、呼ばれたら {@link DynamicAdvisedInterceptor} に渡す。
      *
